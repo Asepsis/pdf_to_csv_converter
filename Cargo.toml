@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 pdf-extract = "0.6.4"
 regex = "1"
+clap = "3.1"
