@@ -115,14 +115,14 @@ fn main() {
     //Find all Bahn and there positions in the text
     let mut bahn_list: Vec<Bahn> = Vec::new();
     let re_bahn =
-        regex::Regex::new(r"(Bahn\s+)(\d)\s\s(\w.+)\s\s+\s(\d\d\d\d)\s\s+(\w.+)\s\s+(\d\d:\d\d,\d\d)").unwrap();
+        regex::Regex::new(r"(?:\s*Bahn\s+\d+\s*)*Bahn\s+(\d+)\s+(\D+)\s+(\d+(?:/AK\s\d+)?)\s+(.+)\s+(\d+:\d+,\d+)").unwrap();
     re_bahn.captures_iter(&content).for_each(|cap_bahn| {
         let bahn = Bahn {
-            bahn: cap_bahn[2].to_string(),
-            name: cap_bahn[3].to_string(),
-            jahrgang: cap_bahn[4].to_string(),
-            verein: cap_bahn[5].to_string(),
-            zeit: cap_bahn[6].to_string(),
+            bahn: cap_bahn[1].to_string(),
+            name: cap_bahn[2].trim_end().to_string(),
+            jahrgang: cap_bahn[3].to_string(),
+            verein: cap_bahn[4].trim_end().to_string(),
+            zeit: cap_bahn[5].to_string(),
             byte_offset: cap_bahn.get(0).unwrap().start(),
         };
 
