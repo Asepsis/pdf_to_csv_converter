@@ -52,7 +52,7 @@ To build the .exe just run the following command in the terminal:
   #### 👵🧓 Master
   ```txt
   Bahn 1 Linda Lastname  1983/AK 35 Swim-Team 01:15,00
-  Bahn 2 Danae Lastname  1989/AK 30 Swim-Team 01:19  00
+  Bahn 2 Danae Lastname  1989/AK 30 Swim-Team 01:19,00
   Bahn 3 Birte Lastname  1989/AK 30 Swim-Team 01:20,00
   Bahn 4 Karin Lastname  1995/AK 25 Swim-Team 01:06,10
   Bahn 5 Vanessa Lastname  1997/AK 25 Swim-Team 01:14,96
