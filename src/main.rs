@@ -14,6 +14,7 @@ struct Bahn {
 #[derive(Debug, Eq, PartialEq, Clone)]
 struct Lauf {
     lauf: String,
+    time: String,
     bahn_list: Vec<Bahn>,
     byte_offset: usize,
 }
@@ -29,7 +30,7 @@ struct Wettkampf {
 /// # Output wk.csv
 fn convert_to_csv(wk: Vec<Wettkampf>) {
     let mut csv_string = String::new();
-    csv_string.push_str("WK;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n");
+    csv_string.push_str("WK;Uhrzeit;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n");
     for w in wk {
         // csv_string.push_str(&w.wettkampf);
         // csv_string.push_str(";");
@@ -38,6 +39,8 @@ fn convert_to_csv(wk: Vec<Wettkampf>) {
             // csv_string.push_str(";");
             for b in l.bahn_list {
                 csv_string.push_str(&w.wettkampf);
+                csv_string.push_str(";");
+                csv_string.push_str(&l.time);
                 csv_string.push_str(";");
                 csv_string.push_str(&l.lauf);
                 csv_string.push_str(";");
@@ -71,9 +74,10 @@ fn main() {
     println!("Verein name: {}", verein_name);
 
     let content = extract_text(file_path).unwrap();
-   
+    // println!("Content: {}", content);
+
     //Save as txt for debug purposes
-    // std::fs::write("message.txt", &content).unwrap();
+    //std::fs::write("message.txt", &content).unwrap();
 
     //Try to solve Bahn 1 issues if Bahn 8 in is empty in the Lauf before
     // remove all lines with (Bahn\s+)(\d+)(:\s+)$ from content
@@ -82,7 +86,7 @@ fn main() {
     // println!("{:#?}", clean_content);
 
     //Find all Wettkampf and there positions in the text
-    let re_wk = regex::Regex::new(r"(Wettkampf\s\d+)\s+(.+)\s(\(.+\))").unwrap();
+    let re_wk = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d+m\s+\S+)\s(\S.+)").unwrap();
     let mut wk_list: Vec<Wettkampf> = Vec::new();
     re_wk.captures_iter(&content).for_each(|cap_wk| {
         let wk = Wettkampf {
@@ -96,10 +100,11 @@ fn main() {
 
     //Find all Lauf and there positions in the text
     let mut lauf_list: Vec<Lauf> = Vec::new();
-    let re_lf = regex::Regex::new(r"(Lauf\s+)(\d+)(:\s+)").unwrap();
+    let re_lf = regex::Regex::new(r"(Lauf\s+)(\d+)/(\d+)\s\(ca.\s(\d+:\d+)\sUhr\)").unwrap();
     re_lf.captures_iter(&content).for_each(|cap_lf| {
         let lf = Lauf {
             lauf: cap_lf[2].to_string(),
+            time: cap_lf[4].to_string(),
             bahn_list: Vec::new(),
             byte_offset: cap_lf.get(0).unwrap().start(),
         };
@@ -110,7 +115,7 @@ fn main() {
     //Find all Bahn and there positions in the text
     let mut bahn_list: Vec<Bahn> = Vec::new();
     let re_bahn =
-        regex::Regex::new(r"(Bahn\s+)(\d):\s+(\w.+)\s+\(\s\)(\d\d\d\d)\s+(\w.+)\s\s((?:\d+:\d+,\d+||__:__,__))").unwrap();
+        regex::Regex::new(r"(Bahn\s+)(\d)\s\s(\w.+)\s\s+\s(\d\d\d\d)\s\s+(\w.+)\s\s+(\d\d:\d\d,\d\d)").unwrap();
     re_bahn.captures_iter(&content).for_each(|cap_bahn| {
         let bahn = Bahn {
             bahn: cap_bahn[2].to_string(),
@@ -121,10 +126,12 @@ fn main() {
             byte_offset: cap_bahn.get(0).unwrap().start(),
         };
 
-        if bahn.verein.eq(verein_name) {
+        if bahn.verein == verein_name.to_string() {
             bahn_list.push(bahn);
         }
+        // bahn_list.push(bahn);
     });
+    // println!("{:#?}", bahn_list);
 
     //Add Bahn to the appropriate Lauf
     lauf_list.iter_mut().rev().for_each(|lf| {
@@ -153,6 +160,7 @@ fn main() {
 
     //Remove all empty Wettkampf
     wk_list.retain(|wk| !wk.lauf_list.is_empty());
+
 
     convert_to_csv(wk_list);
 
