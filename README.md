@@ -4,6 +4,9 @@ This programm will convert a pdf for swim-meets to a csv file with only the impo
 
 This is pretty specific and only works for the annoucement from Mörfelden.
 
+## Compile
+To build the .exe just run the following command in the terminal:
+`cargo build --release`
 
 ## Example
 ### Input

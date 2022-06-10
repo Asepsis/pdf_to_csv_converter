@@ -29,7 +29,7 @@ struct Wettkampf {
 /// # Output wk.csv
 fn convert_to_csv(wk: Vec<Wettkampf>) {
     let mut csv_string = String::new();
-    csv_string.push_str("WK;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n\r");
+    csv_string.push_str("WK;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n");
     for w in wk {
         // csv_string.push_str(&w.wettkampf);
         // csv_string.push_str(";");
@@ -50,7 +50,7 @@ fn convert_to_csv(wk: Vec<Wettkampf>) {
                 csv_string.push_str(&b.verein);
                 csv_string.push_str(";");
                 csv_string.push_str(&b.zeit);
-                csv_string.push_str(";;;;;;;;;\n\r");
+                csv_string.push_str(";;;;;;;;;\n");
             }
         }
     }
@@ -66,6 +66,10 @@ fn main() {
     //Extract text from PDF
     let file_path = &args[1]; //"wk.pdf";
     let verein_name = &args[2]; //"Verein";
+
+    println!("File path: {}", file_path);
+    println!("Verein name: {}", verein_name);
+
     let content = extract_text(file_path).unwrap();
    
     //Save as txt for debug purposes
