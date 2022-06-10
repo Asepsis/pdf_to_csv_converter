@@ -134,8 +134,10 @@ fn main() {
 
         if bahn.verein == verein_name.to_string() {
             bahn_list.push(bahn);
+        } else if verein_name == "" {
+            bahn_list.push(bahn);
         }
-        // bahn_list.push(bahn);
+
     });
 
     //Add Bahn to the appropriate Lauf
