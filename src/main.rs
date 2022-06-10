@@ -1,5 +1,6 @@
 use pdf_extract::*;
 use regex;
+use std::env;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 struct Bahn {
@@ -59,8 +60,12 @@ fn convert_to_csv(wk: Vec<Wettkampf>) {
 
 
 fn main() {
+
+    let args: Vec<String> = env::args().collect();
+
     //Extract text from PDF
-    let file_path = "wk.pdf";
+    let file_path = &args[1]; //"wk.pdf";
+    let verein_name = &args[2]; //"Verein";
     let content = extract_text(file_path).unwrap();
    
     //Save as txt for debug purposes
@@ -112,7 +117,7 @@ fn main() {
             byte_offset: cap_bahn.get(0).unwrap().start(),
         };
 
-        if bahn.verein == "SVS Griesheim" {
+        if bahn.verein.eq(verein_name) {
             bahn_list.push(bahn);
         }
     });

@@ -1,4 +1,15 @@
 # PDF to CSV converter
+## Description
 This programm will convert a pdf for swim-meets to a csv file with only the important starts from your team.
 
 This is pretty specific and only works for the annoucement from Mörfelden.
+
+
+## Example
+### Input
+`rs_pdf_extract.exe ME-SKVM.pdf "SVS Griesheim"`
+### Ouput
+
+
+## Source:
+https://hsv-sued.de/wp-content/uploads/2022/06/ME-SKVM.pdf
