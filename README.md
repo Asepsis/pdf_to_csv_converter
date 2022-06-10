@@ -67,10 +67,29 @@ To build the .exe just run the following command in the terminal:
 ## 👀 How to use
 
 ### Input:
-`rs_pdf_extract.exe 220514-ME-Darmstadt.pdf "SVS Griesheim"`
+`rs_pdf_extract.exe -h`
+```sh
+PDF to CSV converter 0.1.0
+Asepsis
+Converts a PDF to a CSV file
+
+USAGE:
+    rs_pdf_extract.exe [OPTIONS]
+
+OPTIONS:
+    -f, --file <FILE>        Sets the file to use
+    -h, --help               Print help information
+    -o, --output <OUTPUT>    Sets the output filename
+    -v, --verein <VEREIN>    Sets the verein to use
+    -V, --version            Print version information
+
+```
+
+`rs_pdf_extract.exe -f 220514-ME-Darmstadt.pdf -v "SVS Griesheim" -o dame.csv`
+
 
 ### Ouput:
-`wk.csv`
+`output_name.csv`
 
 ### Source:
 https://hsv-sued.de/wp-content/uploads/2022/05/220514-ME-Darmstadt.pdf
