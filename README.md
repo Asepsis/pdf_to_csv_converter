@@ -7,10 +7,10 @@ You have to mention a team name by executing the programm with the command line.
 
 The main Branch will convert meldeergebnis from EasyWK to a CSV file.
 
-This is pretty specific and only works propably only with meldeergebnis from EasyWK.
+This is pretty specific and only works propably with meldeergebnis from EasyWK.
 
 
-## 👨‍💻 Compile
+## 👨‍💻 Compile 🦀
 To build the .exe just run the following command in the terminal:
 `cargo build --release`
 
@@ -84,6 +84,3 @@ Below you can see an example output from the programm.
 |WK|Uhrzeit|Lauf|Bahn|Name|Jahrgang|Verein|Zeit|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 |100m Freistil|09:14|3|2|Schwimmer Name|2000|SVS Griesheim|01:43,94||||||||
-
-
-
