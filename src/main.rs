@@ -96,17 +96,18 @@ fn main() {
     let verein_name = matches.value_of("verein").unwrap_or("");
     let output_name = matches.value_of("output").unwrap_or("wk.csv");
 
-    // let mut content = String::new();
-    match extract_text(&file_path) {
-        Ok(_) => { 
+    
+    let content = match extract_text(file_path) {
+        Ok(data) => { 
             println!("Successfully loaded file."); 
+            data
         },
         Err(_) => { 
             println!("Problem opening the file.\nProgramm will exit."); 
             return;
         }
     };
-    let content = extract_text(file_path).unwrap();
+    // let content = extract_text(file_path).unwrap();
     println!("File path: {}", file_path);
     println!("Verein name: {}", verein_name);
     println!("Output name: {}", output_name);
