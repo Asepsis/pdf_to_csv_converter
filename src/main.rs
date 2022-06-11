@@ -1,4 +1,4 @@
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 use pdf_extract::*;
 use regex;
 
@@ -62,7 +62,6 @@ fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
 }
 
 fn main() {
-
     let matches = Command::new("PDF to CSV converter")
         .version("0.1.0")
         .author("Asepsis")
@@ -73,21 +72,46 @@ fn main() {
                 .long("file")
                 .value_name("FILE")
                 .takes_value(true)
-                .help("Sets the file to use")
-                )
-        .arg(Arg::new("verein").short('v').long("verein").value_name("VEREIN").takes_value(true).help("Sets the verein to use"))
-        .arg(Arg::new("output").short('o').long("output").value_name("OUTPUT").takes_value(true).help("Sets the output filename"))
+                .help("Sets the file to use"),
+        )
+        .arg(
+            Arg::new("verein")
+                .short('v')
+                .long("verein")
+                .value_name("VEREIN")
+                .takes_value(true)
+                .help("Sets the verein to use"),
+        )
+        .arg(
+            Arg::new("output")
+                .short('o')
+                .long("output")
+                .value_name("OUTPUT")
+                .takes_value(true)
+                .help("Sets the output filename"),
+        )
         .get_matches();
-    
+
     let file_path = matches.value_of("file").unwrap();
     let verein_name = matches.value_of("verein").unwrap_or("");
     let output_name = matches.value_of("output").unwrap_or("wk.csv");
 
+    // let mut content = String::new();
+    match extract_text(&file_path) {
+        Ok(_) => { 
+            println!("Successfully loaded file."); 
+        },
+        Err(_) => { 
+            println!("Problem opening the file.\nProgramm will exit."); 
+            return;
+        }
+    };
+    let content = extract_text(file_path).unwrap();
     println!("File path: {}", file_path);
     println!("Verein name: {}", verein_name);
     println!("Output name: {}", output_name);
-
-    let content = extract_text(file_path).unwrap();
+    
+    // let content = extract_text(file_path).expect("Something went wrong reading the file");
 
     //Find all Wettkampf and there positions in the text
     let re_wk = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d+m\s+\S+)\s(\S.+)").unwrap();
@@ -137,7 +161,6 @@ fn main() {
         } else if verein_name == "" {
             bahn_list.push(bahn);
         }
-
     });
 
     //Add Bahn to the appropriate Lauf
@@ -171,5 +194,4 @@ fn main() {
     convert_to_csv(wk_list, output_name);
 
     println!("Successfully converted PDF to CSV");
-
 }
