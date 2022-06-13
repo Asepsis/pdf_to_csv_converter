@@ -67,7 +67,7 @@ fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
 fn main() {
     // Commandline Args
     let matches = Command::new("PDF to CSV converter")
-        .version("0.1.0")
+        .version("0.1.1")
         .author("Asepsis")
         .about("Converts a PDF to a CSV file")
         .arg(
