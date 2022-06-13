@@ -1,13 +1,19 @@
 use clap::{Arg, Command};
 use pdf_extract::*;
 use regex;
+use std::collections::HashMap;
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+struct Schwimmer {
+    name: String,
+    jahrgang: String,
+    verein: String,
+}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 struct Bahn {
     bahn: String,
-    name: String,
-    jahrgang: String,
-    verein: String,
+    schwimmer: Schwimmer,
     zeit: String,
     byte_offset: usize,
 }
@@ -33,11 +39,7 @@ fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
     csv_string
         .push_str("WK;Uhrzeit;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n");
     for w in wk {
-        // csv_string.push_str(&w.wettkampf);
-        // csv_string.push_str(";");
         for l in w.lauf_list {
-            // csv_string.push_str(&l.lauf);
-            // csv_string.push_str(";");
             for b in l.bahn_list {
                 csv_string.push_str(&w.wettkampf);
                 csv_string.push_str(";");
@@ -47,11 +49,11 @@ fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
                 csv_string.push_str(";");
                 csv_string.push_str(&b.bahn);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.name);
+                csv_string.push_str(&b.schwimmer.name);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.jahrgang);
+                csv_string.push_str(&b.schwimmer.jahrgang);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.verein);
+                csv_string.push_str(&b.schwimmer.verein);
                 csv_string.push_str(";");
                 csv_string.push_str(&b.zeit);
                 csv_string.push_str(";;;;;;;;;\n");
@@ -62,6 +64,7 @@ fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
 }
 
 fn main() {
+    // Commandline Args
     let matches = Command::new("PDF to CSV converter")
         .version("0.1.0")
         .author("Asepsis")
@@ -96,23 +99,22 @@ fn main() {
     let verein_name = matches.value_of("verein").unwrap_or("");
     let output_name = matches.value_of("output").unwrap_or("wk.csv");
 
-    
+    //File handling
     let content = match extract_text(file_path) {
         Ok(data) => { 
             println!("Successfully loaded file."); 
             data
         },
         Err(_) => { 
-            println!("Problem opening the file.\nProgramm will exit."); 
-            return;
+            println!("Problem opening the file.\nProgramm will exit.");
+            return
         }
     };
-    // let content = extract_text(file_path).unwrap();
+
     println!("File path: {}", file_path);
     println!("Verein name: {}", verein_name);
     println!("Output name: {}", output_name);
     
-    // let content = extract_text(file_path).expect("Something went wrong reading the file");
 
     //Find all Wettkampf and there positions in the text
     let re_wk = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d+m\s+\S+)\s(\S.+)").unwrap();
@@ -141,6 +143,9 @@ fn main() {
         lauf_list.push(lf);
     });
 
+    //Swimmer HashMap
+    let mut schwimmer_list: HashMap<String, Schwimmer> = HashMap::new();
+
     //Find all Bahn and there positions in the text
     let mut bahn_list: Vec<Bahn> = Vec::new();
     let re_bahn = regex::Regex::new(
@@ -148,22 +153,32 @@ fn main() {
     )
     .unwrap();
     re_bahn.captures_iter(&content).for_each(|cap_bahn| {
-        let bahn = Bahn {
-            bahn: cap_bahn[1].to_string(),
+
+        let new_schwimmer = Schwimmer {
             name: cap_bahn[2].trim_end().to_string(),
             jahrgang: cap_bahn[3].to_string(),
             verein: cap_bahn[4].trim_end().to_string(),
+        };
+
+
+        let bahn = Bahn {
+            bahn: cap_bahn[1].to_string(),
+            schwimmer: new_schwimmer.clone(),
             zeit: cap_bahn[5].to_string(),
             byte_offset: cap_bahn.get(0).unwrap().start(),
         };
-
-        if bahn.verein == verein_name.to_string() {
+        
+        if bahn.schwimmer.verein == verein_name.to_string() {
+            schwimmer_list.insert(cap_bahn[2].trim_end().to_string(), new_schwimmer);
             bahn_list.push(bahn);
         } else if verein_name == "" {
+            schwimmer_list.insert(cap_bahn[2].trim_end().to_string(), new_schwimmer);
             bahn_list.push(bahn);
         }
     });
-
+    // println!("Bahn:\n{}", schwimmer_list.len());
+    // println!("Found Swimmer:\n{:#?}", schwimmer_list);
+    let amount_of_starts = bahn_list.len();
     //Add Bahn to the appropriate Lauf
     lauf_list.iter_mut().rev().for_each(|lf| {
         lf.bahn_list.extend(
@@ -194,5 +209,8 @@ fn main() {
 
     convert_to_csv(wk_list, output_name);
 
+    println!("Found: {} Swimmers", schwimmer_list.len());
+    println!("Found: {} Starts", amount_of_starts);
     println!("Successfully converted PDF to CSV");
+    
 }
