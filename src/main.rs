@@ -2,6 +2,7 @@ use clap::{Arg, Command};
 use pdf_extract::*;
 use regex;
 use std::collections::HashMap;
+use colored::*;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 struct Schwimmer {
@@ -102,18 +103,18 @@ fn main() {
     //File handling
     let content = match extract_text(file_path) {
         Ok(data) => { 
-            println!("Successfully loaded file."); 
+            println!("{}", "Successfully loaded file.".green()); 
             data
         },
         Err(_) => { 
-            println!("Problem opening the file.\nProgramm will exit.");
+            println!("{}", "Problem opening the file.\nProgramm will exit.".red());
             return
         }
     };
 
-    println!("File path: {}", file_path);
-    println!("Verein name: {}", verein_name);
-    println!("Output name: {}", output_name);
+    println!("File path: {}", file_path.magenta());
+    println!("Verein name: {}", verein_name.magenta());
+    println!("Output name: {}", output_name.magenta());
     
 
     //Find all Wettkampf and there positions in the text
@@ -209,8 +210,8 @@ fn main() {
 
     convert_to_csv(wk_list, output_name);
 
-    println!("Found: {} Swimmers", schwimmer_list.len());
-    println!("Found: {} Starts", amount_of_starts);
-    println!("Successfully converted PDF to CSV");
+    println!("Swimmers found: {}", schwimmer_list.len().to_string().cyan());
+    println!("Starts found: {}", amount_of_starts.to_string().cyan());
+    println!("{}", "Successfully converted PDF to CSV".green());
     
 }
