@@ -161,7 +161,6 @@ fn main() {
             verein: cap_bahn[4].trim_end().to_string(),
         };
 
-
         let bahn = Bahn {
             bahn: cap_bahn[1].to_string(),
             schwimmer: new_schwimmer.clone(),
@@ -177,9 +176,10 @@ fn main() {
             bahn_list.push(bahn);
         }
     });
-    // println!("Bahn:\n{}", schwimmer_list.len());
-    // println!("Found Swimmer:\n{:#?}", schwimmer_list);
+
+    //Save amounts of starts
     let amount_of_starts = bahn_list.len();
+
     //Add Bahn to the appropriate Lauf
     lauf_list.iter_mut().rev().for_each(|lf| {
         lf.bahn_list.extend(
