@@ -107,6 +107,5 @@ Below you can see an example output from the programm.
 ---
 
 ## License
-```
+
 This programm is only for educational purposes and is not intended to be used in any production environment.
-```
