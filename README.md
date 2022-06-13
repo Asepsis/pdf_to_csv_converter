@@ -103,3 +103,8 @@ Below you can see an example output from the programm.
 |WK|Uhrzeit|Lauf|Bahn|Name|Jahrgang|Verein|Zeit|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 |100m Freistil|09:14|3|2|Schwimmer Name|2000|SVS Griesheim|01:43,94||||||||
+
+---
+
+## Liability
+This programm is only for educational purposes and is not intended to be used in any production environment.
