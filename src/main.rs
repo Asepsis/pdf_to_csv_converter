@@ -1,7 +1,7 @@
 use clap::{Arg, Command};
 use pdf_extract::*;
 use regex;
-use std::collections::HashMap;
+use std::{collections::HashMap, io::BufReader, io::prelude::*, fs::File};
 use colored::*;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
@@ -94,11 +94,20 @@ fn main() {
                 .takes_value(true)
                 .help("Sets the output filename"),
         )
+        .arg(
+            Arg::new("check")
+                .short('c')
+                .long("check")
+                .value_name("CHECK")
+                .takes_value(false)
+                .help("Compares amount of lines in the CSV file to the amount of lines after read PDF file"),
+        )
         .get_matches();
 
     let file_path = matches.value_of("file").unwrap();
     let verein_name = matches.value_of("verein").unwrap_or("");
     let output_name = matches.value_of("output").unwrap_or("wk.csv");
+    let check = matches.is_present("check");
 
     //File handling
     let content = match extract_text(file_path) {
@@ -212,6 +221,26 @@ fn main() {
 
     println!("Swimmers found: {}", schwimmer_list.len().to_string().cyan());
     println!("Starts found: {}", amount_of_starts.to_string().cyan());
-    println!("{}", "Successfully converted PDF to CSV".green());
+    
+
+    if check {
+        let csv_file = File::open(output_name).unwrap();
+        let mut buf_reader = BufReader::new(csv_file);
+        let mut contents = String::new();
+        buf_reader.read_to_string(&mut contents).unwrap();
+        //Count lines
+        let csv_lines = contents.lines().count();
+
+        if csv_lines-1 == amount_of_starts {
+            println!("{}", "Successfully converted PDF to CSV".green());
+        } else {
+            println!("{}", "Problem checking CSV file.".red());
+            println!("{}", "Something went wrong. Programm will exit.".red());
+        }
+    } else {
+        println!("{}", "Converted PDF to CSV".yellow());
+    }
+    
+    
     
 }

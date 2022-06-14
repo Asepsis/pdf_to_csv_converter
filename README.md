@@ -69,7 +69,7 @@ To build the .exe just run the following command in the terminal:
 ### Input:
 `./pdf_to_csv_converter -h`
 ```sh
-PDF to CSV converter 0.1.0
+PDF to CSV converter 0.1.1
 Asepsis
 Converts a PDF to a CSV file
 
@@ -77,12 +77,13 @@ USAGE:
     pdf_to_csv_converter.exe [OPTIONS]
 
 OPTIONS:
+    -c, --check              Compares amount of lines in the CSV file to the amount of lines after
+                             read PDF file
     -f, --file <FILE>        Sets the file to use
     -h, --help               Print help information
     -o, --output <OUTPUT>    Sets the output filename
     -v, --verein <VEREIN>    Sets the verein to use
     -V, --version            Print version information
-
 ```
 
 `./pdf_to_csv_converter.exe -f 220514-ME-Darmstadt.pdf -v "SVS Griesheim" -o dame.csv`
