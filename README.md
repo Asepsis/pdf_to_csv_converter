@@ -67,14 +67,14 @@ To build the .exe just run the following command in the terminal:
 ## 👀 How to use
 
 ### Input:
-`rs_pdf_extract.exe -h`
+`./pdf_to_csv_converter -h`
 ```sh
 PDF to CSV converter 0.1.0
 Asepsis
 Converts a PDF to a CSV file
 
 USAGE:
-    rs_pdf_extract.exe [OPTIONS]
+    pdf_to_csv_converter.exe [OPTIONS]
 
 OPTIONS:
     -f, --file <FILE>        Sets the file to use
@@ -85,7 +85,7 @@ OPTIONS:
 
 ```
 
-`rs_pdf_extract.exe -f 220514-ME-Darmstadt.pdf -v "SVS Griesheim" -o dame.csv`
+`./pdf_to_csv_converter.exe -f 220514-ME-Darmstadt.pdf -v "SVS Griesheim" -o dame.csv`
 
 
 ### Ouput:
