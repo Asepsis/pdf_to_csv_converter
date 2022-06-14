@@ -222,13 +222,13 @@ fn main() {
     println!("Swimmers found: {}", schwimmer_list.len().to_string().cyan());
     println!("Starts found: {}", amount_of_starts.to_string().cyan());
     
-
+    //Check if amount of lines in the CSV file is equal to amount of lines after read PDF file
+    //In fact the CSV file has one line more than the PDF file reader because of the header
     if check {
         let csv_file = File::open(output_name).unwrap();
         let mut buf_reader = BufReader::new(csv_file);
         let mut contents = String::new();
         buf_reader.read_to_string(&mut contents).unwrap();
-        //Count lines
         let csv_lines = contents.lines().count();
 
         if csv_lines-1 == amount_of_starts {
@@ -240,7 +240,5 @@ fn main() {
     } else {
         println!("{}", "Converted PDF to CSV".yellow());
     }
-    
-    
     
 }
