@@ -88,7 +88,7 @@ OPTIONS:
 
 
 ### Ouput:
-`output_name.csv`
+`wk2022.csv`
 
 ### Source:
 https://hsv-sued.de/wp-content/uploads/2022/05/220514-ME-Darmstadt.pdf
