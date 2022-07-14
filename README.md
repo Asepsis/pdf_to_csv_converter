@@ -84,7 +84,7 @@ OPTIONS:
     -V, --version            Print version information
 ```
 
-`./pdf_to_csv_converter.exe -f 220514-ME-Darmstadt.pdf -v "Club Name" -o wk2022.csv`
+`./pdf_to_csv_converter.exe -f 220514-ME-Darmstadt.pdf -c "Club Name" -o wk2022.csv`
 
 
 ### Ouput:
