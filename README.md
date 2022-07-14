@@ -47,7 +47,7 @@ To build the .exe just run the following command in the terminal:
     Bahn 5 Luis Lastname  2008 Swim-Team 02:22,13
     Bahn 6 Marcell Lastname  2008 Swim-Team 02:22,94
     Bahn 7
-    Bahn 8 Jona Willi Schächer  2007 Swim-Team 02:25,13
+    Bahn 8 Jona Lastname  2007 Swim-Team 02:25,13
   ```
   #### 👵🧓 Master
   ```txt
