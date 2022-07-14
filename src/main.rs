@@ -1,62 +1,83 @@
-use clap::{Arg, Command};
+use clap::Parser;
+use colored::*;
 use pdf_extract::*;
 use regex;
-use std::{collections::HashMap, io::BufReader, io::prelude::*, fs::File};
-use colored::*;
+use std::{collections::HashMap, fs::File, io::prelude::*, io::BufReader};
+
+#[derive(Debug, Parser)]
+#[clap(author, version, about, long_about = None)]
+struct Cli {
+    /// Path to the PDF file to be processed
+    #[clap(short, long)]
+    file: String,
+    /// Output file name
+    #[clap(short, long, default_value = "wk.csv")]
+    output: String,
+    /// Name of the club
+    #[clap(short, long)]
+    club: String,
+    /// Turn on debug mode
+    #[clap(short, long)]
+    debug: bool,
+    /// Turn on check mode
+    #[clap(short, long)]
+    validate: bool,
+}
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-struct Schwimmer {
+struct Swimmer {
     name: String,
-    jahrgang: String,
-    verein: String,
+    year: String,
+    club: String,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-struct Bahn {
-    bahn: String,
-    schwimmer: Schwimmer,
-    zeit: String,
-    byte_offset: usize,
-}
-#[derive(Debug, Eq, PartialEq, Clone)]
-struct Lauf {
-    lauf: String,
+struct Lane {
+    lane: String,
+    swimmer: Swimmer,
     time: String,
-    bahn_list: Vec<Bahn>,
+    byte_offset: usize,
+}
+#[derive(Debug, Eq, PartialEq, Clone)]
+struct Run {
+    run: String,
+    time: String,
+    lane_list: Vec<Lane>,
     byte_offset: usize,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-struct Wettkampf {
-    wettkampf: String,
-    lauf_list: Vec<Lauf>,
+struct Competition {
+    competition: String,
+    run_list: Vec<Run>,
     byte_offset: usize,
 }
+
 /// Takes a Vector from Wettkampf and saves a formated .csv file in the root folder
 /// # Arguments is a Vec<Wettkampf>
 /// # Output wk.csv
-fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
+fn convert_to_csv(wk: Vec<Competition>, output_name: &str) {
     let mut csv_string = String::new();
     csv_string
         .push_str("WK;Uhrzeit;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n");
     for w in wk {
-        for l in w.lauf_list {
-            for b in l.bahn_list {
-                csv_string.push_str(&w.wettkampf);
+        for l in w.run_list {
+            for b in l.lane_list {
+                csv_string.push_str(&w.competition);
                 csv_string.push_str(";");
                 csv_string.push_str(&l.time);
                 csv_string.push_str(";");
-                csv_string.push_str(&l.lauf);
+                csv_string.push_str(&l.run);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.bahn);
+                csv_string.push_str(&b.lane);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.schwimmer.name);
+                csv_string.push_str(&b.swimmer.name);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.schwimmer.jahrgang);
+                csv_string.push_str(&b.swimmer.year);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.schwimmer.verein);
+                csv_string.push_str(&b.swimmer.club);
                 csv_string.push_str(";");
-                csv_string.push_str(&b.zeit);
+                csv_string.push_str(&b.time);
                 csv_string.push_str(";;;;;;;;;\n");
             }
         }
@@ -66,172 +87,152 @@ fn convert_to_csv(wk: Vec<Wettkampf>, output_name: &str) {
 
 fn main() {
     // Commandline Args
-    let matches = Command::new("PDF to CSV converter")
-        .version("0.1.1")
-        .author("Asepsis")
-        .about("Converts a PDF to a CSV file")
-        .arg(
-            Arg::new("file")
-                .short('f')
-                .long("file")
-                .value_name("FILE")
-                .takes_value(true)
-                .help("Sets the file to use"),
-        )
-        .arg(
-            Arg::new("verein")
-                .short('v')
-                .long("verein")
-                .value_name("VEREIN")
-                .takes_value(true)
-                .help("Sets the verein to use"),
-        )
-        .arg(
-            Arg::new("output")
-                .short('o')
-                .long("output")
-                .value_name("OUTPUT")
-                .takes_value(true)
-                .help("Sets the output filename"),
-        )
-        .arg(
-            Arg::new("check")
-                .short('c')
-                .long("check")
-                .value_name("CHECK")
-                .takes_value(false)
-                .help("Compares amount of lines in the CSV file to the amount of lines after read PDF file"),
-        )
-        .get_matches();
-
-    let file_path = matches.value_of("file").unwrap();
-    let verein_name = matches.value_of("verein").unwrap_or("");
-    let output_name = matches.value_of("output").unwrap_or("wk.csv");
-    let check = matches.is_present("check");
+    let args = Cli::parse();
+    let file_path = args.file;
+    let club_name = args.club;
+    let output_name = args.output;
+    let debug = args.debug;
+    let validate = args.validate;
 
     //File handling
-    let content = match extract_text(file_path) {
-        Ok(data) => { 
-            println!("{}", "Successfully loaded file.".green()); 
+    let content = match extract_text(&file_path) {
+        Ok(data) => {
+            println!("{}", "Successfully loaded file.".green());
             data
-        },
-        Err(_) => { 
+        }
+        Err(_) => {
             println!("{}", "Problem opening the file.\nProgramm will exit.".red());
-            return
+            return;
         }
     };
 
+    // Save content to file
+    if debug {
+        let mut file = File::create("debug.txt").unwrap();
+        file.write_all(content.as_bytes()).unwrap();
+    }
+
     println!("File path: {}", file_path.magenta());
-    println!("Verein name: {}", verein_name.magenta());
+    println!("Club name: {}", club_name.magenta());
     println!("Output name: {}", output_name.magenta());
-    
 
     //Find all Wettkampf and there positions in the text
-    let re_wk = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d+m\s+\S+)\s(\S.+)").unwrap();
-    let mut wk_list: Vec<Wettkampf> = Vec::new();
-    re_wk.captures_iter(&content).for_each(|cap_wk| {
-        let wk = Wettkampf {
-            wettkampf: cap_wk[2].to_string(),
-            lauf_list: Vec::new(),
-            byte_offset: cap_wk.get(0).unwrap().start(),
+    let re_comp = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d+\s*m\s+\S+)\s(\S.+)").unwrap();
+    let mut comp_list: Vec<Competition> = Vec::new();
+    re_comp.captures_iter(&content).for_each(|cap_comp| {
+        let comp = Competition {
+            competition: cap_comp[2].to_string(),
+            run_list: Vec::new(),
+            byte_offset: cap_comp.get(0).unwrap().start(),
         };
-
-        wk_list.push(wk);
+        if debug {
+            println!("{}", "Competition found: ".red());
+            println!("{}", comp.competition.magenta());
+        }
+        comp_list.push(comp);
     });
 
     //Find all Lauf and there positions in the text
-    let mut lauf_list: Vec<Lauf> = Vec::new();
-    let re_lf = regex::Regex::new(r"(Lauf\s+)(\d+)/(\d+)\s\(ca.\s(\d+:\d+)\sUhr\)").unwrap();
-    re_lf.captures_iter(&content).for_each(|cap_lf| {
-        let lf = Lauf {
-            lauf: cap_lf[2].to_string(),
-            time: cap_lf[4].to_string(),
-            bahn_list: Vec::new(),
-            byte_offset: cap_lf.get(0).unwrap().start(),
+    let mut run_list: Vec<Run> = Vec::new();
+    let re_run = regex::Regex::new(r"(Lauf\s+)(\d+)/(\d+)\s\(ca.\s(\d+:\d+)\sUhr\)").unwrap();
+    re_run.captures_iter(&content).for_each(|cap_run| {
+        let run = Run {
+            run: cap_run[2].to_string(),
+            time: cap_run[4].to_string(),
+            lane_list: Vec::new(),
+            byte_offset: cap_run.get(0).unwrap().start(),
         };
 
-        lauf_list.push(lf);
+        run_list.push(run);
     });
 
     //Swimmer HashMap
-    let mut schwimmer_list: HashMap<String, Schwimmer> = HashMap::new();
+    let mut swimmer_list: HashMap<String, Swimmer> = HashMap::new();
 
     //Find all Bahn and there positions in the text
-    let mut bahn_list: Vec<Bahn> = Vec::new();
-    let re_bahn = regex::Regex::new(
+    let mut lane_list: Vec<Lane> = Vec::new();
+    let re_lane = regex::Regex::new(
         r"(?:\s*Bahn\s+\d+\s*)*Bahn\s+(\d+)\s+(\D+)\s+(\d+(?:/AK\s\d+)?)\s+(.+)\s+(\d+:\d+,\d+)",
     )
     .unwrap();
-    re_bahn.captures_iter(&content).for_each(|cap_bahn| {
-
-        let new_schwimmer = Schwimmer {
-            name: cap_bahn[2].trim_end().to_string(),
-            jahrgang: cap_bahn[3].to_string(),
-            verein: cap_bahn[4].trim_end().to_string(),
+    re_lane.captures_iter(&content).for_each(|cap_lane| {
+        let new_swimmer = Swimmer {
+            name: cap_lane[2].trim_end().to_string(),
+            year: cap_lane[3].to_string(),
+            club: cap_lane[4].trim_end().to_string(),
         };
 
-        let bahn = Bahn {
-            bahn: cap_bahn[1].to_string(),
-            schwimmer: new_schwimmer.clone(),
-            zeit: cap_bahn[5].to_string(),
-            byte_offset: cap_bahn.get(0).unwrap().start(),
+        let lane = Lane {
+            lane: cap_lane[1].to_string(),
+            swimmer: new_swimmer.clone(),
+            time: cap_lane[5].to_string(),
+            byte_offset: cap_lane.get(0).unwrap().start(),
         };
-        
-        if bahn.schwimmer.verein == verein_name.to_string() {
-            schwimmer_list.insert(cap_bahn[2].trim_end().to_string(), new_schwimmer);
-            bahn_list.push(bahn);
-        } else if verein_name == "" {
-            schwimmer_list.insert(cap_bahn[2].trim_end().to_string(), new_schwimmer);
-            bahn_list.push(bahn);
+
+        if lane.swimmer.club == club_name.to_string() {
+            if debug {
+                println!("{}: {:#?}", "Swimmer".red(), new_swimmer);
+                println!("{}: {:#?}", "Lane".red(), lane);
+            }
+            swimmer_list.insert(cap_lane[2].trim_end().to_string(), new_swimmer);
+            lane_list.push(lane);
+        } else if club_name == "" {
+            swimmer_list.insert(cap_lane[2].trim_end().to_string(), new_swimmer);
+            lane_list.push(lane);
         }
     });
 
     //Save amounts of starts
-    let amount_of_starts = bahn_list.len();
+    let amount_of_starts = lane_list.len();
 
     //Add Bahn to the appropriate Lauf
-    lauf_list.iter_mut().rev().for_each(|lf| {
-        lf.bahn_list.extend(
-            bahn_list
+    run_list.iter_mut().rev().for_each(|run| {
+        run.lane_list.extend(
+            lane_list
                 .iter()
                 .cloned()
-                .filter(|bahn| bahn.byte_offset > lf.byte_offset),
+                .filter(|lane| lane.byte_offset > run.byte_offset),
         );
-        bahn_list.retain(|bahn| bahn.byte_offset < lf.byte_offset);
+        lane_list.retain(|lane| lane.byte_offset < run.byte_offset);
     });
 
     //Remove all empty bahn_lists
-    lauf_list.retain(|lf| !lf.bahn_list.is_empty());
+    run_list.retain(|run| !run.lane_list.is_empty());
 
     //Add Lauf to the appropriate Wettkampf
-    wk_list.iter_mut().rev().for_each(|wk| {
-        wk.lauf_list.extend(
-            lauf_list
+    comp_list.iter_mut().rev().for_each(|comp| {
+        comp.run_list.extend(
+            run_list
                 .iter()
                 .cloned()
-                .filter(|lf| lf.byte_offset > wk.byte_offset),
+                .filter(|run| run.byte_offset > comp.byte_offset),
         );
-        lauf_list.retain(|lf| lf.byte_offset < wk.byte_offset);
+        run_list.retain(|run| run.byte_offset < comp.byte_offset);
     });
 
     //Remove all empty Wettkampf
-    wk_list.retain(|wk| !wk.lauf_list.is_empty());
+    comp_list.retain(|comp| !comp.run_list.is_empty());
 
-    convert_to_csv(wk_list, output_name);
+    if debug {
+        println!("{:#?}", comp_list);
+        println!("{:#?}", swimmer_list);
+    }
 
-    println!("Swimmers found: {}", schwimmer_list.len().to_string().cyan());
+    convert_to_csv(comp_list, &output_name);
+
+    println!("Swimmers found: {}", swimmer_list.len().to_string().cyan());
     println!("Starts found: {}", amount_of_starts.to_string().cyan());
-    
+
     //Check if amount of lines in the CSV file is equal to amount of lines after read PDF file
     //In fact the CSV file has one line more than the PDF file reader because of the header
-    if check {
+    if validate {
         let csv_file = File::open(output_name).unwrap();
         let mut buf_reader = BufReader::new(csv_file);
         let mut contents = String::new();
         buf_reader.read_to_string(&mut contents).unwrap();
         let csv_lines = contents.lines().count();
 
-        if csv_lines-1 == amount_of_starts {
+        if csv_lines - 1 == amount_of_starts {
             println!("{}", "Successfully converted PDF to CSV".green());
         } else {
             println!("{}", "Problem checking CSV file.".red());
@@ -240,5 +241,4 @@ fn main() {
     } else {
         println!("{}", "Converted PDF to CSV".yellow());
     }
-    
 }
