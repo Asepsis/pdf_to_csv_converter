@@ -117,7 +117,7 @@ fn main() {
     println!("Output name: {}", output_name.magenta());
 
     //Find all Wettkampf and there positions in the text
-    let re_comp = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d+\s*m\s+\S+)\s(\S.+)").unwrap();
+    let re_comp = regex::Regex::new(r"(Wettkampf\s\d+)\s-\s(\d*?\S*\d+\s*m\s+\S+)\s(\S.+)").unwrap();
     let mut comp_list: Vec<Competition> = Vec::new();
     re_comp.captures_iter(&content).for_each(|cap_comp| {
         let comp = Competition {
@@ -152,10 +152,12 @@ fn main() {
     //Find all Bahn and there positions in the text
     let mut lane_list: Vec<Lane> = Vec::new();
     let re_lane = regex::Regex::new(
-        r"(?:\s*Bahn\s+\d+\s*)*Bahn\s+(\d+)\s+(\D+)\s+(\d+(?:/AK\s\d+)?)\s+(.+)\s+(\d+:\d+,\d+)",
+        r"Bahn[ \t]+(\d+)[ \t]+([^\n]+)[ \t]+((?:\d+(?:/AK[ \t]\d+)?)|)[ \t]+([^\n]+)[ \t]+(\d+:\d+,\d+)",
     )
     .unwrap();
     re_lane.captures_iter(&content).for_each(|cap_lane| {
+        println!("{}", "Lane found: ".red());
+        println!("{}", cap_lane[3].magenta());
         let new_swimmer = Swimmer {
             name: cap_lane[2].trim_end().to_string(),
             year: cap_lane[3].to_string(),
