@@ -59,7 +59,7 @@ struct Competition {
 fn convert_to_csv(wk: Vec<Competition>, output_name: &str) {
     let mut csv_string = String::new();
     csv_string
-        .push_str("WK;Uhrzeit;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;ZZ;\n");
+        .push_str("WK;Uhrzeit;Lauf;Bahn;Name;Jahrgang;Verein;Zeit;Split 1;Split 2;Split 3;Split 4;Split 5;Split 6;Split 7;Split 8;\n");
     for w in wk {
         for l in w.run_list {
             for b in l.lane_list {
@@ -152,12 +152,10 @@ fn main() {
     //Find all Bahn and there positions in the text
     let mut lane_list: Vec<Lane> = Vec::new();
     let re_lane = regex::Regex::new(
-        r"Bahn[ \t]+(\d+)[ \t]+([^\n]+)[ \t]+((?:\d+(?:/AK[ \t]\d+)?)|)[ \t]+([^\n]+)[ \t]+(\d+:\d+,\d+)",
+        r"Bahn[ \t]+(\d+)[ \t]+([^\n]+)[ \t][ \t]+(\d+(?:/AK\s\d+)?|)[ \t]+([^\n]+)[ \t]+(\d+:\d+,\d+)",
     )
     .unwrap();
     re_lane.captures_iter(&content).for_each(|cap_lane| {
-        println!("{}", "Lane found: ".red());
-        println!("{}", cap_lane[3].magenta());
         let new_swimmer = Swimmer {
             name: cap_lane[2].trim_end().to_string(),
             year: cap_lane[3].to_string(),

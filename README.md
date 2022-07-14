@@ -69,24 +69,22 @@ To build the .exe just run the following command in the terminal:
 ### Input:
 `./pdf_to_csv_converter -h`
 ```sh
-PDF to CSV converter 0.1.1
-Asepsis
-Converts a PDF to a CSV file
+pdf_to_csv_converter 0.1.2
 
 USAGE:
-    pdf_to_csv_converter.exe [OPTIONS]
+    pdf_to_csv_converter.exe [OPTIONS] --file <FILE> --club <CLUB>
 
 OPTIONS:
-    -c, --check              Compares amount of lines in the CSV file to the amount of lines after
-                             read PDF file
-    -f, --file <FILE>        Sets the file to use
+    -c, --club <CLUB>        Name of the club
+    -d, --debug              Turn on debug mode
+    -f, --file <FILE>        Path to the PDF file to be processed 
     -h, --help               Print help information
-    -o, --output <OUTPUT>    Sets the output filename
-    -v, --verein <VEREIN>    Sets the verein to use
+    -o, --output <OUTPUT>    Output file name [default: wk.csv]   
+    -v, --validate           Turn on check mode
     -V, --version            Print version information
 ```
 
-`./pdf_to_csv_converter.exe -f 220514-ME-Darmstadt.pdf -v "SVS Griesheim" -o dame.csv`
+`./pdf_to_csv_converter.exe -f 220514-ME-Darmstadt.pdf -v "Club Name" -o wk2022.csv`
 
 
 ### Ouput:
@@ -99,11 +97,10 @@ https://hsv-sued.de/wp-content/uploads/2022/05/220514-ME-Darmstadt.pdf
 ## 📄 Table of Contents / Example
 
 Below you can see an example output from the programm.
-`ZZ` is the short name for Zwischenzeit.
 
-|WK|Uhrzeit|Lauf|Bahn|Name|Jahrgang|Verein|Zeit|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|ZZ|
+|WK|Uhrzeit|Lauf|Bahn|Name|Jahrgang|Verein|Zeit|Split 1|Split 2|Split 3|Split 4|Split 5|Split 6|Split 7|Split 8|
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-|100m Freistil|09:14|3|2|Schwimmer Name|2000|SVS Griesheim|01:43,94||||||||
+|100m Freistil|09:14|3|2|Schwimmer Name|2000|Club Name|01:43,94||||||||
 
 ---
 
